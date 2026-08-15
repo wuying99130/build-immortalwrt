@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y build-essential clang flex bison g++ gawk \
-          gcc-multilib gettext git libncurses5-dev libssl-dev python3-distutils \
+          gcc-multilib gettext git libncurses5-dev libssl-dev \
           rsync unzip zlib1g-dev
 
     - name: Clone ImmortalWrt
@@ -56,4 +56,3 @@ jobs:
         files: immortalwrt/bin/targets/sunxi/cortexa7/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
