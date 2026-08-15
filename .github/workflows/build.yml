@@ -1,4 +1,4 @@
-name: Build NanoPi R1S-H3 Base Firmware
+name: Build NanoPi R1S-H3 Stable 23.05 Firmware
 
 on:
   workflow_dispatch:
@@ -21,9 +21,9 @@ jobs:
           gcc-multilib gettext git libncurses5-dev libssl-dev \
           rsync unzip zlib1g-dev
 
-    - name: Clone ImmortalWrt
+    - name: Clone ImmortalWrt 23.05 Stable
       run: |
-        git clone https://github.com/immortalwrt/immortalwrt.git
+        git clone -b openwrt-23.05 https://github.com/immortalwrt/immortalwrt.git
         cd immortalwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
@@ -31,11 +31,8 @@ jobs:
     - name: Apply Device Files
       run: |
         cd immortalwrt
-        # DTS 正确路径（ImmortalWrt 使用 files/arch/arm/boot/dts/）
         cp ../device/dts/sun8i-h3-nanopi-r1s-h3.dts target/linux/sunxi/files/arch/arm/boot/dts/
-        # image.mk 路径正确
         cp ../device/image/nanopi-r1s-h3.mk target/linux/sunxi/image/
-        # seed.config
         cp ../seed/nanopi-r1s-h3.base.config .config
         make defconfig
 
