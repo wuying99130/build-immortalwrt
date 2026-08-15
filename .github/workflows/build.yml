@@ -31,8 +31,11 @@ jobs:
     - name: Apply Device Files
       run: |
         cd immortalwrt
-        cp ../device/dts/sun8i-h3-nanopi-r1s-h3.dts target/linux/sunxi/files/arch/arm/boot/dts/
+        # 稳定版 23.05 的 DTS 正确路径
+        cp ../device/dts/sun8i-h3-nanopi-r1s-h3.dts target/linux/sunxi/dts/
+        # image.mk 正确路径（稳定版一致）
         cp ../device/image/nanopi-r1s-h3.mk target/linux/sunxi/image/
+        # seed.config 放到源码根目录
         cp ../seed/nanopi-r1s-h3.base.config .config
         make defconfig
 
