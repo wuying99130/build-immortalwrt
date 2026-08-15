@@ -1,1 +1,59 @@
+name: Build NanoPi R1S-H3 Base Firmware
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential clang flex bison g++ gawk \
+          gcc-multilib gettext git libncurses5-dev libssl-dev python3-distutils \
+          rsync unzip zlib1g-dev
+
+    - name: Clone ImmortalWrt
+      run: |
+        git clone https://github.com/immortalwrt/immortalwrt.git
+        cd immortalwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: Apply Device Files
+      run: |
+        cd immortalwrt
+        cp ../device/dts/sun8i-h3-nanopi-r1s-h3.dts target/linux/sunxi/dts/
+        cp ../device/image/nanopi-r1s-h3.mk target/linux/sunxi/image/
+        cp ../seed/nanopi-r1s-h3.base.config .config
+        make defconfig
+
+    - name: Build Firmware
+      run: |
+        cd immortalwrt
+        make -j$(nproc)
+
+    - name: Rename Images
+      run: |
+        DATE=$(date +%Y%m%d)
+        cd immortalwrt/bin/targets/sunxi/cortexa7/
+
+        mv *ext4-sdcard.img.gz immortalwrt-sunxi-cortexa7-nanopi-r1s-h3-ext4-sdcard-${DATE}.img.gz
+        mv *squashfs-sdcard.img.gz immortalwrt-sunxi-cortexa7-nanopi-r1s-h3-squashfs-sdcard-${DATE}.img.gz
+        mv *rootfs.tar.gz immortalwrt-sunxi-cortexa7-rootfs-${DATE}.tar.gz
+
+    - name: Upload Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: immortalwrt/bin/targets/sunxi/cortexa7/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
